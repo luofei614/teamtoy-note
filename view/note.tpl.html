@@ -1,0 +1,108 @@
+<?php 
+do_action( 'UI_DASHBOARD_BEFORE' ); 
+?>
+<style>
+	ul#todo_list_follow li {
+    background: url("static/image/tt2.btn.del.small.png") no-repeat scroll 12px 12px white;
+}
+</style>
+<div class="row-fluid">
+<div class="span7">
+	<!-- dropdown menu -->
+	<?php do_action( 'UI_DASHBOARD_TODO_CATE_BEFORE' ); ?>
+	<div class="btn-group card-title">
+		<a class="dropdown-toggle" data-toggle="dropdown" href="#">工作笔记&nbsp;<span class="caret"></span></a>
+  		<ul class="dropdown-menu" id="todo_tab_menu">
+    		<!-- dropdown menu links -->
+    		<li><a tabindex="-1" href="?c=dashboard&a=index" >我的TODO</a></li>
+  			<li><a tabindex="-1" href="?c=dashboard&a=index&type=follow" >我关注的TODO</a></li>
+  			<?php do_action( 'UI_DASHBOARD_TODO_CATE_LAST' ); ?>
+		</ul>
+		<a href="javascript:note_del_all();" class="side_link">清空所有笔记</a>
+	</div>
+	<?php do_action( 'UI_DASHBOARD_TODO_CATE_AFTER' ); ?>
+	
+	<?php do_action( 'UI_DASHBOARD_TODO_LIST_BEFORE' ); ?>
+
+	<div  id="todo_follow">
+		<ul id="todo_list_follow">
+		<?php
+		if(!empty($data)):
+		foreach($data as $arr):
+		?>
+		<li id="n-<?=$arr['id']?>" onclick="note_del('<?=$arr['id']?>')" class="blue follow" title="点击删除笔记"><div title="<?=$arr['content']?>" class="todo_row"><a class="item"><?=$arr['content']?></a></div></li>
+		<?php
+		endforeach;
+		endif;
+		?>
+		</ul>
+	</div>
+
+	<?php do_action( 'UI_DASHBOARD_TODO_LIST_AFTER' ); ?>
+	
+	<?php do_action( 'UI_DASHBOARD_TODO_SCRIPT_BEFORE' ); ?>
+
+	<?php do_action( 'UI_DASHBOARD_TODO_SCRIPT_AFTER' ); ?>
+</div>
+
+<?php do_action( 'UI_SIDEBOARD_BEFORE' ); ?>
+<div class="span5" id="side_board">
+ 	<div id="todo_box">
+	<div id="side_container" >
+	<h2 class="side_board">添加笔记</h2>	
+	<form class="form-horizontal" action="javascript:note_add()" method="post" id="todo_form">
+	<div > <input  name="content" type="text" placeholder="请输入笔记内容" class="full tt" id="note_add_content"></div>  
+	<div class="line"></div>
+	<div><!--<a href="#" class="gray_link">添加更多描述</a>-->
+		<a href="<?=c('teamtoy_url')?>/?a=promo" target="_blank"><img src="<?=c('teamtoy_url')?>/?a=promo_img" onError="$(this).hide();void(0);" /></a>
+		<button class="btn pull-right" type="submit" >保存</button>
+	</div> 
+	</form>	
+
+	</div>
+	
+</div>
+<script type="text/javascript">
+	function note_add(){
+		var content=$('#note_add_content').val();
+		if(''==content){
+			alert('笔记内容不能为空');
+			return ;
+		}
+  		$.post('?c=api&a=note_add&token=<?=$token?>','content='+content,function(d,s,x){
+			var ret=$.parseJSON(d);
+			if('success'==ret.err_msg){
+				$('<li id="n-'+ret.data.id+'" onclick="note_del('+ret.data.id+')" class="blue follow" title="点击删除笔记"><div title="'+content+'" class="todo_row"><a class="item">'+content+'</a></div></li>').appendTo('#todo_list_follow').hide().fadeIn(500);	
+				$('#note_add_content').val('');
+			}else{
+				alert('添加失败');	
+			}	
+	});	
+	}
+	function note_del(id){
+		$.get('?c=api&a=note_delete&id='+id+'&token=<?=$token?>',function(d,s,x){
+			var ret=$.parseJSON(d);
+			if('success'==ret.err_msg){
+			$('#n-'+id).fadeOut(500,function(){
+				$(this).remove();	
+			});
+			}else{
+				alert('删除失败');
+			}
+		});
+	}
+	function note_del_all(){
+		$.get('?c=api&a=note_del_all&token=<?=$token?>',function(d,s,x){
+				var ret=$.parseJSON(d);
+				if('success'==ret.err_msg){
+					$('#todo_list_follow').empty();	
+				}else{
+					alert('清空失败');
+				}
+		})
+	}
+</script>	
+</div>
+<?php do_action( 'UI_SIDEBOARD_AFTER' ); ?>
+</div>
+<?php do_action( 'UI_DASHBOARD_AFTER' ); ?>
