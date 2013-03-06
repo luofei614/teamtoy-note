@@ -35,7 +35,7 @@ function note_page(){
 //API
 add_action('API_NOTE_LIST','note_list');
 function note_list(){
-	$data=get_data("select * from note where uid='".uid()."' order by id asc");
+	$data=get_data("select * from note where uid='".uid()."' order by id desc");
 	return apiController::send_result($data);
 }
 add_action('API_NOTE_ADD','note_add');
